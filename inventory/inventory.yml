@@ -1,0 +1,46 @@
+all:
+  children:
+    devnet:
+      hosts:
+        # devnet-host1:
+        #   ansible_host: 192.168.1.101
+        #   network: devnet
+        #   peerid: null  # or remove this line if peer_id is not defined
+        #   node_p2p_priv: 
+        #   sequencer: false
+        # devnet-host2:
+        #   ansible_host: 192.168.1.102
+        #   network: devnet
+        #   peerid: null  # or remove this line if peer_id is not defined
+        #   node_p2p_priv:   
+        #   sequencer: false
+    testnet:
+      hosts:
+        96512c8f025702cb7e3ab165:
+          ansible_host: 185.26.8.197
+          network: testnet
+          peerid: c6be0dff7cdef69a5bdff10abb14e5b1fb242d45d6bf3ff756
+          node_p2p_priv: 4ac79fc4449c261bb7168b220fac447b9df6db185f156f95b6f0d11841c94375
+          sequencer: true
+        30adc69b2b5eabffdb836a6a:
+          ansible_host: 186.233.185.50
+          network: testnet
+          peerid: 5ebc12beb7427179dea095ca02758d00e278afbb7202b113b6
+          node_p2p_priv: 8400d705b5b044c9e6ff31975e32fa34c90040ce76eda9f42285213020ff63de
+          sequencer: false
+    mainnet:
+      hosts:
+        # mainnet-host1:
+        #   ansible_host: 192.168.3.101
+        #   network: mainnet
+        #   peerid: null  # or remove this line if peer_id is not defined
+        #   node_p2p_priv: 
+        #   sequencer: false
+        # mainnet-host2:
+        #   ansible_host: 192.168.3.102
+        #   network: mainnet
+        #   peerid: null  # or remove this line if peer_id is not defined
+        #   sequencer: false
+
+
+

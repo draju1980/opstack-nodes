@@ -1,0 +1,36 @@
+---
+- name: Install HAProxy on ubuntu
+  become: true
+  apt:
+    name: haproxy
+    state: present
+
+- name: Enable HAProxy service
+  become: true
+  ansible.builtin.systemd:
+    name: haproxy
+    enabled: yes
+
+- name: Copy HAProxy Configuration File
+  become: true
+  ansible.builtin.template:
+    src: ../templates/haproxy.cfg.j2
+    dest: "/etc/haproxy/haproxy.cfg"
+
+- name: reload haproxy
+  become: true
+  ansible.builtin.service:
+    name: haproxy
+    state: restarted
+    
+
+# - name: Password for HAProxy stats UI
+#   debug:
+#     msg: "HAProxy stats UI (http://{{ node_public_ip }}:1234/stats) username: Scott, password: Tiger"
+#   tags: haproxy_ui
+
+- name: To check the status of grafana alloy agent on node
+  debug:
+    msg: "Grfana agent UI (http://{{ node_public_ip }}:{{ grafana_http_listen_port }})"
+  tags: grafana_agent_ui
+  

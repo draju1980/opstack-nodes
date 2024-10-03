@@ -1,0 +1,62 @@
+# HAProxy Configuration File
+
+global
+    log stdout format raw local0
+    maxconn 4096
+    tune.ssl.default-dh-param 2048
+
+defaults
+    log global
+    mode http
+    option httplog
+    option dontlognull
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+
+# Stats settings (optional, useful for monitoring)
+#listen stats
+#    bind *:8080
+#    stats enable
+#    stats uri /stats
+#    stats auth Scott:Tiger
+#    stats refresh 30s
+
+# Configuration for Prometheus scrape for HAProxy
+frontend stats
+   bind *:8404
+   http-request use-service prometheus-exporter if { path /metrics }
+   stats enable
+   stats uri /stats
+   stats refresh 10s
+
+
+# OP-Geth RPC settings
+frontend opgeth_rpc_http
+    bind *:{{ geth_rpc_haproxy_port }}
+    default_backend opgeth_rpc
+
+backend opgeth_rpc
+    mode http
+    option httpchk GET / HTTP/1.1
+    server opgeth 127.0.0.1:{{ geth_rpc_port }}
+
+# OP-Geth WSS settings
+frontend opgeth_wss_http
+    bind *:{{ geth_wss_haproxy_port }}
+    default_backend opgeth_wss
+
+backend opgeth_wss
+    mode http
+    option httpchk GET / HTTP/1.1
+    server opgeth 127.0.0.1:{{ geth_wss_port }}
+
+# OP-Node RPC settings
+frontend opnode_rpc_http
+    bind *:{{ opnode_rpc_haproxy_port }}
+    default_backend opnode_rpc
+
+backend opnode_rpc
+    mode http
+    option httpchk GET / HTTP/1.1
+    server opnode 127.0.0.1:{{ opnode_rpc_port }}

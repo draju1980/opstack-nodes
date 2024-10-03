@@ -1,0 +1,85 @@
+---
+- name: install Docker  Docker and pull all Docker images
+  when: ansible_os_family == 'Debian' or ansible_distribution == 'Ubuntu'
+  become: true
+  block:
+    - name: Install Docker dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - apt-transport-https
+        - jp
+        - gnupg-agent
+        - python3-pip
+        - python3-docker
+
+    - name: Add Docker official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        state: present
+
+    - name: Create Docker group if it doesn't exist
+      ansible.builtin.group:
+        name: docker
+        state: present
+
+    - name: Add user to Docker group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Add alloy to Docker group
+      ansible.builtin.user:
+        name: alloy
+        groups: docker
+        append: yes
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Change group ownership of Docker socket
+      ansible.builtin.file:
+        path: /var/run/docker.sock
+        group: docker
+        state: file
+
+    - name: Set permissions on Docker socket
+      ansible.builtin.file:
+        path: /var/run/docker.sock
+        mode: '0660'
+        state: file
+
+    - name: Create Docker Network
+      community.docker.docker_network:
+        name: "{{ docker_network_name }}"
+        driver: bridge
+
+    - name: Pull OP-Geth Docker image
+      docker_image:
+        name: "{{ opgeth_docker_image }}"
+        source: pull
+
+    - name: Check if jwt.txt file exists
+      ansible.builtin.stat:
+        path: "{{ opgeth_appdata }}/config/jwt-secret.txt" 
+      register: geth_password_file
+
+    - name: Stop all running Docker containers to aviod any data corruption during the updates.
+      when: geth_password_file.stat.exists == True
+      become: true
+      shell: docker stop $(docker ps -a -q)
+      tags: docker_pod
+      ignore_errors: True
+  tags: docker

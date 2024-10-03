@@ -1,0 +1,68 @@
+---
+# GETH Config perameters for testnet
+# 8545 TCP, used by the HTTP based JSON RPC API
+# 8546 TCP, used by the WebSocket based JSON RPC API
+# 30304 UDP, used by the P2P protocol's new peer discovery overlay
+# 30303 TCP and UDP, used by the P2P protocol running the network
+geth_rpc_port: 8545
+geth_rpc_haproxy_port: 18545
+geth_wss_port: 8546
+geth_wss_haproxy_port: 18546
+geth_l2_port: 8551
+geth_metrics_port: 1111
+geth_p2p_udp_port: 30304
+geth_p2p_tcp_port: 30303
+
+opgeth_ports:
+  - "0.0.0.0:{{ geth_rpc_port }}:{{ geth_rpc_port }}"
+  - "0.0.0.0:{{ geth_wss_port }}:{{ geth_wss_port }}"
+  - "127.0.0.1:{{ geth_l2_port }}:{{ geth_l2_port }}"
+  - "127.0.0.1:{{ geth_metrics_port }}:{{ geth_metrics_port }}"  # curl http://localhost:1111/debug/metrics/prometheus
+  - "0.0.0.0:{{ geth_p2p_udp_port }}:{{ geth_p2p_udp_port }}"
+  - "0.0.0.0:{{ geth_p2p_tcp_port }}:{{ geth_p2p_tcp_port }}"
+
+# Op-Node Config perameters for testnet
+# 8547 TCP, used by the HTTP based JSON RPC API
+# 8551 for L2
+# 9003 UDP, used by the P2P protocol's new peer discovery overlay
+# 9003 TCP and UDP, used by the P2P protocol running the network
+opnode_rpc_port: 8547
+opnode_rpc_haproxy_port: 18547
+opnode_p2p_port: 9003
+opnode_metrics_port: 2222
+
+opnode_ports:
+  - "0.0.0.0:{{ opnode_rpc_port }}:{{ opnode_rpc_port }}"
+  - "127.0.0.1:{{ opnode_metrics_port }}:{{ opnode_metrics_port }}" # curl http://localhost:2222/metrics
+  - "0.0.0.0:{{ opnode_p2p_port }}:{{ opnode_p2p_port }}"
+
+
+
+# op-batcher Config perameters for testnet
+# 8548 TCP, used by the HTTP based JSON RPC API
+opbatcher_rpc_port: 8548
+opbatcher_rpc_haproxy_port: 18548
+opbatcher_metrics_port: 3333
+
+opbatcher_ports:
+  - "127.0.0.1:{{ opbatcher_rpc_port }}:{{ opbatcher_rpc_port }}"
+  - "127.0.0.1:{{ opbatcher_metrics_port }}:{{ opbatcher_metrics_port }}" # curl http://localhost:3333/metrics
+
+
+# op-proposer Config perameters for testnet
+# 8560 TCP, used by the HTTP based JSON RPC API
+oppropose_rpc_port: 8560
+oppropose_rpc_haproxy_port: 18560
+oppropose_metrics_port: 4444
+
+oppropose_ports:
+  - "127.0.0.1:{{ oppropose_rpc_port }}:{{ oppropose_rpc_port }}"
+  - "127.0.0.1:{{ oppropose_metrics_port }}:{{ oppropose_metrics_port }}" # curl http://localhost:4444/metrics
+
+# cadvisor Config perameters for testnet
+cadvisor_metrics_port: 8081
+cadvisor_ports:
+  - "127.0.0.1:8081:8080"
+
+grafana_http_listen_port: 12345
+ha_proxy_stats_port: 1234

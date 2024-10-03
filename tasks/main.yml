@@ -1,0 +1,65 @@
+---
+# tasks file for inerval-nodes
+- name: Install op stack on interval nodes
+  hosts: all
+  tasks:
+    # importing variables based on network environment
+    - name: Include vars based on network environment
+      ansible.builtin.include_vars:
+        file: ../vars/{{ network }}.yml
+      tags: env_vars
+
+    # importing secrets based on network environment
+    - name: Include vault secrets based on network environment
+      ansible.builtin.include_vars:
+        file: ../files/{{ network }}/{{ network }}_vault_secrets.yml
+      tags: network_vars
+
+    # importing the defaults
+    - name: Include defaults variables
+      ansible.builtin.include_vars:
+        file: ../defaults/main.yml
+      tags: main_vars
+
+    # importing the datadir task
+    - import_tasks: firewall.yml
+      tags: firewall
+
+    # importing the datadir task
+    - import_tasks: utils.yml
+      tags: utils
+
+    # importing the docker installation task
+    - import_tasks: docker.yml
+      tags: docker
+
+
+    # importing the op-geth installation task
+    - import_tasks: op-geth.yml
+      tags: op-geth
+
+    # importing the op-node installation task
+    - import_tasks: op-node.yml
+      tags: op-node
+
+    # importing the op-batcher installation task
+    - import_tasks: op-batcher.yml
+      tags: op-batcher
+    
+    # importing the op-proposer installation task
+    - import_tasks: op-proposer.yml
+      tags: op-proposer
+    
+    # # importing the da-server installation task
+    # - import_tasks: da-server.yml
+    #   tags: da-server
+
+    # importing the Grafana agent installation and configration task
+    - import_tasks: grafana.yml
+      tags: grafana
+
+    # importing the haproxy installation task
+    - import_tasks: haproxy.yml
+      tags: haproxy
+
+  

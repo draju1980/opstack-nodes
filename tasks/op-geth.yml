@@ -1,0 +1,54 @@
+---
+- name: Copy jwtsecret to op geth config location
+  ansible.builtin.template:
+    src: "../templates/jwt-secret.txt.j2"
+    dest: "{{ opgeth_appdata }}/config/jwt-secret.txt"
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+
+- name: Copy Geth Genisis file to config location
+  ansible.builtin.copy:
+    src: "../files/{{ network }}/genesis.json"
+    dest: "{{ opgeth_appdata }}/config/genesis.json"
+  tags: genisis_file
+  become: true
+
+- name: Copy entrypoint.sh to config location
+  ansible.builtin.copy:
+    src: "../files/{{ network }}/entrypoint.sh"
+    dest: "{{ opgeth_appdata }}/config/entrypoint.sh"
+  tags: entrypoint_sh
+  become: true
+
+- name: Start OP-Geth node container
+  become: true
+  ansible.builtin.docker_container:
+    name: "{{ opgeth_node_name }}"
+    hostname: "{{ opgeth_node_name }}"
+    image: "{{ opgeth_docker_image }}"
+    # command: 
+    #   --datadir=/root/.ethereum/data --verbosity=3 --http --http.corsdomain="*" --http.vhosts="*" --http.addr=0.0.0.0 --http.api=web3,debug,eth,txpool,net,engine --ws --ws.addr=0.0.0.0 --ws.port={{ geth_wss_port }} --ws.origins="*" --ws.api=debug,eth,txpool,net,engine --syncmode=full --gcmode=archive --nodiscover --maxpeers=20 --networkid=42069 --authrpc.vhosts="*" --authrpc.addr=0.0.0.0 --authrpc.port=8551 --authrpc.jwtsecret=/root/.ethereum/config/jwt-secret.txt --rollup.disabletxpoolgossip=true --metrics --metrics.addr=0.0.0.0 --metrics.port={{ geth_metrics_port }}
+    entrypoint:  
+      - "/bin/sh"
+      - "/entrypoint.sh"
+    state: started
+    restart_policy: always
+    networks_cli_compatible: yes
+    networks:
+      - name: "{{ docker_network_name }}"
+    ports: "{{ opgeth_ports }}"
+    volumes:
+      - "{{ opgeth_appdata }}/data:/db"
+      - "{{ opgeth_appdata }}/config/genesis.json:/genesis.json"
+      - "{{ opgeth_appdata }}/config/jwt-secret.txt:/jwt-secret.txt"
+      - "{{ opgeth_appdata }}/config/entrypoint.sh:/entrypoint.sh"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+      GETH_MINER_RECOMMIT: 100ms
+
+- name: Pause ansible task for 10 seconds so that op-geth cointainer will be up and running
+  pause:
+    seconds: 10

@@ -1,0 +1,39 @@
+---
+# defaults var file for inerval-nodes
+
+# The default data directory for all containers
+datadir: "$HOME/opdata" # The directory where the cointainer data will be stored
+
+# Application data directory
+app_data_path: "{{ datadir.path }}"
+opgeth_appdata: "{{ app_data_path }}/{{ opgeth_node_name }}"
+opnode_appdata: "{{ app_data_path }}/{{ opnode_node_name }}"
+opbatcher_appdata: "{{ app_data_path }}/{{ opbatcher_node_name }}"
+opproposer_appdata: "{{ app_data_path }}/{{ opproposer_node_name }}"
+da_server_appdata: "{{ app_data_path }}/{{ da_server_node_name }}"
+
+# Docker network name
+docker_network_name: "appnet"
+
+
+# Cointaiuner names for op-geth, op-node, op-batcher, op-proposer, da-server and haproxy
+opgeth_node_name: "op-geth"
+opgeth_docker_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101315.1"
+opnode_node_name: "op-node"
+opnode_docker_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.6"
+opbatcher_node_name: "op-batcher"
+opbatcher_docker_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.7.6"
+opproposer_node_name: "op-proposer"
+opproposer_docker_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:v1.7.6"
+da_server_node_name: "da-server"
+da_server_docker_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server@sha256:60452f19045cd03e52327cd16b8ce0553a752ed201d4717d7d957f128e81a190"
+
+# cadvisor docker image
+cadvisor_node_name: "cadvisor"
+cadvisor_docker_image: "gcr.io/cadvisor/cadvisor:latest"
+
+haproxy_node_name: "haproxy"
+haproxy_docker_image: "haproxy:latest"
+
+# Random peer-id for the op-geth, op-node nodes
+random_peer_id: "{{ lookup('peerid', '/dev/null length=32 chars=ascii_letters') }}"

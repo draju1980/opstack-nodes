@@ -1,0 +1,86 @@
+---
+- name: Install and configure Grafana Alloy
+  become: true
+  block:
+    - name: Install required dependencies
+      apt:
+        name: gpg
+        state: present
+        update_cache: yes
+
+    - name: Create directory for Grafana GPG key
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Import the GPG key and add Grafana package repository
+      shell: |
+        wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+        echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+
+    - name: Update repositories
+      apt:
+        update_cache: yes
+
+    - name: Install Grafana Alloy
+      apt:
+        name: alloy
+        state: present
+
+    - name: Enable Grafana Alloy service
+      ansible.builtin.systemd:
+        name: alloy
+        enabled: yes
+
+    - name: Stopped Alloy service
+      ansible.builtin.systemd:
+        name: alloy
+        state: stopped
+        enabled: yes
+    
+    - name: Backup the original Alloy configuration file
+      copy:
+        src: /etc/alloy/config.alloy
+        dest: /etc/alloy/config.alloy.bak
+        remote_src: yes
+
+    - name: Backup the original Alloy pareant config file
+      copy:
+        src: /etc/default/alloy
+        dest: /etc/default/alloy.bak
+        remote_src: yes
+
+
+    - name: Copy Grafan Alloy Configuration File
+      ansible.builtin.template:
+        src: ../templates/alloy_config.j2
+        dest: "/etc/alloy/config.alloy"
+        owner: root
+        group: root
+        mode: '0755'
+
+
+    - name: Copy Grafan Alloy main Configuration File
+      ansible.builtin.template:
+        src: ../templates/alloy.j2
+        dest: "/etc/default/alloy"
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Copy Grafan Alloy service file
+      ansible.builtin.template:
+        src: ../templates/alloy_service.j2
+        dest: "/usr/lib/systemd/system/alloy.service"
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Start Alloy service
+      ansible.builtin.systemd:
+        name: alloy
+        state: started
+        enabled: yes

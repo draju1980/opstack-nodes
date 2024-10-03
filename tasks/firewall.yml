@@ -1,0 +1,65 @@
+---
+- name: Install iptables and open ports for rpc, wss and p2p
+  become: true
+  block:
+    - name: Install NTP
+      become: true
+      apt:
+        name: ntp
+        state: present
+        
+    - name: Open the rpc , wss and p2p ports on TCP using iptables
+      become: true
+      shell: iptables -A INPUT -p tcp --dport {{ item }} -j ACCEPT
+      loop:
+        - "{{ geth_p2p_tcp_port }}"
+        - "{{ geth_p2p_udp_port }}"
+        - "{{ opnode_p2p_port }}"
+        - "{{ geth_rpc_port }}"
+        - "{{ geth_wss_port }}"
+        - "{{ opnode_rpc_port }}"
+        - "{{ grafana_http_listen_port }}"
+
+
+    - name: Open the rpc , wss and p2p ports on UDP using iptables
+      become: true
+      shell: iptables -A INPUT -p udp --dport {{ item }} -j ACCEPT
+      loop:
+        - "{{ geth_p2p_tcp_port }}"
+        - "{{ geth_p2p_udp_port }}"
+        - "{{ opnode_p2p_port }}"
+        - "{{ geth_rpc_port }}"
+        - "{{ geth_wss_port }}"
+        - "{{ opnode_rpc_port }}"
+        - "{{ grafana_http_listen_port }}"
+        
+  tags: firewall
+
+- name: Disable direct root login via SSH
+  become: true
+  block: 
+    - name: Disable direct root login via SSH
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin no'
+
+    - name: Ensure the user is in the sudo group
+      user:
+        name: "{{ ansible_user }}"
+        groups: sudo
+        append: yes
+
+    - name: Create a sudoers file to allow the user to execute all commands
+      copy:
+        dest: "/etc/sudoers.d/{{ ansible_user }}"
+        content: "{{ ansible_user }} ALL=(ALL) NOPASSWD:ALL"
+        validate: '/usr/sbin/visudo -cf %s'
+        mode: '0440'
+
+    - name: Restart SSH service
+      service:
+        name: ssh
+        state: restarted
+      become: true
+  tags: norootlogin

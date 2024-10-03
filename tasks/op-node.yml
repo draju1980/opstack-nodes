@@ -1,0 +1,126 @@
+---
+- name: Pull OP-Node image
+  become: true
+  docker_image:
+    name: "{{ opnode_docker_image }}"
+    source: pull
+
+- name: Copy jwtsecret to op-node data location
+  ansible.builtin.template:
+    src: "../templates/jwt-secret.txt.j2"
+    dest: "{{ opnode_appdata }}/data/jwt-secret.txt"
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+
+- name: Copy p2p-node-key.txt file to data location
+  ansible.builtin.template:
+    src: "../templates/p2p-node-key.txt.j2"
+    dest: "{{ opnode_appdata }}/data/p2p-node-key.txt"
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+
+- name: Copy rollup.json file to data location
+  ansible.builtin.copy:
+    src: "../files/{{ network }}/rollup.json"
+    dest: "{{ opnode_appdata }}/data/rollup.json"
+  tags: rollup_file
+  become: true
+
+- name: Start OP-Node container with sequencer enabled
+  when: sequencer == true
+  become: true
+  ansible.builtin.docker_container:
+    name: "{{ opnode_node_name }}"
+    hostname: "{{ opnode_node_name }}"
+    image: "{{ opnode_docker_image }}"
+    entrypoint:
+      - op-node  
+      - --l2=http://op-geth:8551
+      - --l2.jwt-secret=./jwt-secret.txt
+      - --sequencer.enabled
+      - --sequencer.l1-confs=5
+      - --verifier.l1-confs=4
+      - --rollup.config=./rollup.json
+      - --rpc.addr=0.0.0.0
+      - --rpc.port={{ opnode_rpc_port }}
+      - --p2p.disable
+      - --rpc.enable-admin
+      - --p2p.sequencer.key={{ GS_SEQUENCER_PRIVATE_KEY }}
+      - --l1={{ L1_RPC_URL }}
+      - --l1.rpckind={{ L1_RPC_KIND }}
+      - --metrics.enabled
+      - --metrics.addr=0.0.0.0
+      - --metrics.port={{ opnode_metrics_port }}
+      - --rpc.enable-admin
+      - --p2p.listen.ip=0.0.0.0
+      - --p2p.listen.tcp={{ opnode_p2p_port }}
+      - --p2p.listen.udp={{ opnode_p2p_port }}
+      - --p2p.priv.path=./p2p-node-key.txt
+      - --p2p.static=/ip4/{{ node_public_ip }}/tcp/9222/p2p/{{ peerid }}
+      - --pprof.enabled=true   
+    state: started
+    restart_policy: always
+    networks_cli_compatible: yes
+    networks:
+      - name: "{{ docker_network_name }}"
+    ports: "{{ opnode_ports }}"
+    volumes:
+      - "{{ opnode_appdata }}/data:/data"
+      - "{{ opnode_appdata }}/data/rollup.json:/rollup.json"
+      - "{{ opnode_appdata }}/data/jwt-secret.txt:/jwt-secret.txt"
+      - "{{ opnode_appdata }}/data/p2p-node-key.txt:/p2p-node-key.txt"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+- name: Start OP-Node container
+  when: sequencer == false
+  become: true
+  ansible.builtin.docker_container:
+    name: "{{ opnode_node_name }}"
+    hostname: "{{ opnode_node_name }}"
+    image: "{{ opnode_docker_image }}"
+    entrypoint:
+      - op-node  
+      - --l2=http://op-geth:8551
+      - --l2.jwt-secret=./jwt-secret.txt
+      - --sequencer.l1-confs=5
+      - --verifier.l1-confs=4
+      - --rollup.config=./rollup.json
+      - --rpc.addr=0.0.0.0
+      - --rpc.port={{ opnode_rpc_port }}
+      - --p2p.disable
+      - --rpc.enable-admin
+      - --p2p.sequencer.key={{ GS_SEQUENCER_PRIVATE_KEY }}
+      - --l1={{ L1_RPC_URL }}
+      - --l1.rpckind={{ L1_RPC_KIND }}
+      - --metrics.enabled
+      - --metrics.addr=0.0.0.0
+      - --metrics.port={{ opnode_metrics_port }}
+      - --rpc.enable-admin
+      - --p2p.listen.ip=0.0.0.0
+      - --p2p.listen.tcp={{ opnode_p2p_port }}
+      - --p2p.listen.udp={{ opnode_p2p_port }}
+      - --p2p.priv.path=./p2p-node-key.txt
+      - --p2p.static=/ip4/{{ node_public_ip }}/tcp/9222/p2p/{{ peerid }}
+      - --pprof.enabled=true   
+    state: started
+    restart_policy: always
+    networks_cli_compatible: yes
+    networks:
+      - name: "{{ docker_network_name }}"
+    ports: "{{ opnode_ports }}"
+    volumes:
+      - "{{ opnode_appdata }}/data:/data"
+      - "{{ opnode_appdata }}/data/rollup.json:/rollup.json"
+      - "{{ opnode_appdata }}/data/jwt-secret.txt:/jwt-secret.txt"
+      - "{{ opnode_appdata }}/data/p2p-node-key.txt:/p2p-node-key.txt"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+- name: Pause ansible task for 10 seconds so that op-node cointainer will be up and running
+  pause:
+    seconds: 10

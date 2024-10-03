@@ -1,0 +1,6 @@
+---
+- name: Pull DA-Server image
+  become: true
+  docker_image:
+    name: "{{ da_server_docker_image }}"
+    source: pull

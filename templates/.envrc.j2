@@ -1,0 +1,70 @@
+##################################################
+#                 Getting Started                #
+##################################################
+
+# Admin account
+export GS_ADMIN_ADDRESS={{ GS_ADMIN_ADDRESS }}
+export GS_ADMIN_PRIVATE_KEY={{ GS_ADMIN_PRIVATE_KEY }}
+
+# Batcher account
+export GS_BATCHER_ADDRESS={{ GS_BATCHER_ADDRESS }}
+export GS_BATCHER_PRIVATE_KEY={{ GS_BATCHER_PRIVATE_KEY }}
+
+# Proposer account
+export GS_PROPOSER_ADDRESS={{ GS_PROPOSER_ADDRESS }}
+export GS_PROPOSER_PRIVATE_KEY={{ GS_PROPOSER_PRIVATE_KEY }}
+
+# Sequencer account
+export GS_SEQUENCER_ADDRESS={{ GS_SEQUENCER_ADDRESS }}
+export GS_SEQUENCER_PRIVATE_KEY={{ GS_SEQUENCER_PRIVATE_KEY }}
+
+##################################################
+#              op-node Configuration             #
+##################################################
+
+# The kind of RPC provider, used to inform optimal transactions receipts
+# fetching. Valid options: alchemy, quicknode, infura, parity, nethermind,
+# debug_geth, erigon, basic, any.
+export L1_RPC_KIND={{ L1_RPC_KIND }}
+
+##################################################
+#               Contract Deployment              #
+##################################################
+
+# RPC URL for the L1 network to interact with
+export L1_RPC_URL={{ L1_RPC_URL }}
+
+# ETH_RPC_URL as above
+export ETH_RPC_URL={{ L1_RPC_URL }}
+
+# Salt used via CREATE2 to determine implementation addresses
+# NOTE: If you want to deploy contracts from scratch you MUST reload this
+#       variable to ensure the salt is regenerated and the contracts are
+#       deployed to new addresses (otherwise deployment will fail)
+export IMPL_SALT=$(openssl rand -hex 32)
+
+# Name for the deployed network
+export DEPLOYMENT_CONTEXT=getting-started
+
+# Optional Tenderly details for simulation link during deployment
+# export TENDERLY_PROJECT=
+# export TENDERLY_USERNAME=
+
+# Optional Etherscan API key for contract verification
+# export ETHERSCAN_API_KEY=
+
+# Private key to use for contract deployments, you don't need to worry about
+# this for the Getting Started guide.
+export PRIVATE_KEY={{ GS_ADMIN_PRIVATE_KEY }}
+
+# chain id for (( network )) inverval chain
+#export L1_CHAIN_ID=11155111
+# export L2_CHAIN_ID=42069
+
+# BLOCK_TIME for L1 and L2
+#export L1_BLOCK_TIME=15
+#export L2_BLOCK_TIME=2
+
+# L1 STANDARD BRIDGE PROXY ADDRESS and L2_OUTPUT ORACLE PROXY ADDRESS
+export L2_OUTPUT_ORACLE_PROXY_ADDRESS={{ L2_OUTPUT_ORACLE_PROXY_ADDRESS }}
+export L1_STANDARD_BRIDGE_PROXY_ADDRESS={{ L1_STANDARD_BRIDGE_PROXY_ADDRESS }}
