@@ -1,4 +1,4 @@
-Interval-nodes
+opstack-nodes
 =========
 
 This role is used to deploy the OP-Stack node on target servers. It will deploy all the OP-Stack components, including OP-Geth, OP-Node, OP-Batcher, OP-Proposer, and others, as containers on the target servers. All external RPC and WSS traffic will be routed through a reverse proxy using HAProxy. As part of server hardening, we lock down all unrelated ports and only allow P2P and masked RPC/WSS ports for OP-Stack components through the firewall.
@@ -46,7 +46,7 @@ cd opstack-nodes
 ```
 
 ```sh
-ansible-vault decrypt ./opstack-nodes/files/testnet/testnet_vault_secrets.yml
+ansible-vault decrypt ./files/testnet/testnet_vault_secrets.yml
 ```
 
 To encrypt the testnet environmental variable file, 
@@ -58,7 +58,7 @@ cd deploy-infra/ansible
 ```
 
 ```sh
-ansible-vault encrypt ./opstack-nodes/files/testnet/testnet_vault_secrets.yml
+ansible-vault encrypt ./files/testnet/testnet_vault_secrets.yml
 ```
 
 Dependencies
@@ -118,20 +118,20 @@ Once all prerequisites and dependencies are completed,
 Clone the deploy-infra repository using the following git clone command:
 
 ```sh
-git clone https://github.com/interval-network/deploy-infra.git
+git clone https://github.com/opstack-nodes.git
 ```
 
-Then, change the directory to deploy-infra/ansible:
+Then, change the directory to opstack-nodes:
 
 ```sh
-cd deploy-infra/ansible
+cd opstack-nodese
 ```
 
 
 Use the following command to start the Ansible task for deploying new servers or updating existing ones:
 
 ```sh
-ansible-playbook -i opstack-nodes/inventory/inventory.yml opstack-nodes/tasks/main.yml
+ansible-playbook -i inventory/inventory.yml tasks/main.yml
 ```
 
 Run a Playbook for a Specific Host
@@ -140,7 +140,7 @@ If you want to run the playbook for a specific host, say devnet-host2,
 
 use:
 ```sh
-ansible-playbook -i opstack-nodes/inventory/inventory.yml opstack-nodes/tasks/main.yml --limit devnet-host2
+ansible-playbook -i inventory/inventory.yml tasks/main.yml --limit devnet-host2
 ```
 
 Run a Playbook for a Specific Group
@@ -149,7 +149,7 @@ If you want to target a specific group, say devnet,
 
 use:
 ```sh
-ansible-playbook -i opstack-nodes/inventory/inventory.yml opstack-nodes/tasks/main.yml --limit devnet
+ansible-playbook -i inventory/inventory.yml tasks/main.yml --limit devnet
 ```
 
 Running a Playbook for a Specific Tag
@@ -160,7 +160,7 @@ To run only the grafana task, use the following command:
 
 use:
 ```sh
-ansible-playbook -i opstack-nodes/inventory/inventory.yml opstack-nodes/tasks/main.yml --tags env_vars,network_vars,main_vars,grafana
+ansible-playbook -i inventory/inventory.yml tasks/main.yml --tags env_vars,network_vars,main_vars,grafana
 ```
 
 In this example:
